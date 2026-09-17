@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vinayaka Utsav - 5 Levels</title>
+<style>
+body{margin:0;background:radial-gradient(#fffbeb,#fde68a);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif}
+canvas{border:4px solid #d97706;border-radius:24px;background:#fff;touch-action:none;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+h1{color:#92400e;margin:6px 0 2px} #ui{color:#78350f;font-weight:bold;margin:4px}
+#giftBox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);align-items:center;justify-content:center;flex-direction:column;z-index:10;color:white;text-align:center}
+#giftBox.show{display:flex}.gift{font-size:100px;animation:bounce 1.2s infinite;cursor:pointer}
+.blessing{background:white;color:#92400e;padding:22px;border-radius:20px;max-width:330px;margin-top:12px}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}}
+button{padding:12px 26px;background:#f59e0b;border:none;border-radius:14px;font-weight:bold;margin-top:10px}
+</style></head>
+<body>
+<h1>🙏 Vinayaka Utsav</h1>
+<div id="ui">Level <span id="lvl">1</span>/5 - <span id="lname">Modak Seva</span> | Score: <span id="score">0</span></div>
+<canvas id="g" width="360" height="520"></canvas>
+<button onclick="location.reload()">Restart</button>
+
+<div id="giftBox">
+<div class="gift" onclick="openGift()">🎁</div>
+<p style="font-size:18px">Bappa's Gift is here! Click it!</p>
+<div id="blessingContent" style="display:none">
+<div class="blessing">
+<h2>🌸 Bappa's Ultimate Blessing 🌸</h2>
+<p style="font-size:17px;line-height:1.4">5 Levels complete chesav!<br>Nee jeevitham lo <b>Vighnalu tolagi, Vijayam</b> vastundi.<br>Sukham, Shanti, Aishwaryam nithyam undalani deevistunnanu! 🙏</p>
+<p><b>🌺 Ganpati Bappa Morya! 🌺<br>Divine Quest Champion!</b></p>
+<button onclick="location.reload()">Play Again</button>
+<button onclick="if(navigator.share){navigator.share({title:'Vinayaka Game',url:location.href})}else{alert('Link copied: '+location.href)}">Share Blessing ❤️</button>
+</div></div></div>
+
+<script>
+const c=document.getElementById("g"),x=c.getContext("2d"),scoreEl=document.getElementById("score"),lvlEl=document.getElementById("lvl"),lnameEl=document.getElementById("lname");
+let px=180,score=0,level=1,L=[],gameOver=false;
+const goals=[6,12,20,30,42];
+const names=["1.Modak Seva","2.Laddu Rain","3.Pushpa Arpana","4.Dhol Beats","5.Divine Aarti"];
+const goods=["🍪","🍯","🌺","🥁","🪔"]; const bads=["💣","👾"];
+
+function loop(){
+if(gameOver) return;
+x.clearRect(0,0,360,520);
+x.fillStyle="#fffbeb"; x.fillRect(10,28,(score/goals[level-1])*340,8); x.strokeStyle="#d97706"; x.strokeRect(10,28,340,8);
+x.fillStyle="#78350f"; x.font="bold 12px sans-serif"; x.fillText(names[level-1],10,18);
+x.fillStyle="#fbbf24"; x.beginPath(); x.arc(px,470,24,0,7); x.fill(); x.font="22px Arial"; x.fillText("🙏",px-11,477);
+x.fillStyle="#000"; x.font="bold 16px Arial"; x.fillText("Score:"+score+"/"+goals[level-1],10,55);
+
+L.forEach(o=>{x.font="22px Arial"; x.fillText(o.e,o.x,o.y); o.y+=o.s;
+if(Math.abs(o.x-px)<32 && Math.abs(o.y-470)<32){
+if(o.good){score++;}else{score=Math.max(0,score-2);} scoreEl.textContent=score; o.y=600;
+}});
+L=L.filter(o=>o.y<540);
+if(score>=goals[level-1]){
+if(level<5){level++; lvlEl.textContent=level; lnameEl.textContent=names[level-1]; L=[]; x.fillStyle="#065f46"; x.font="bold 32px sans-serif"; x.fillText("LEVEL "+level,90,260);}
+else{gameOver=true; document.getElementById("giftBox").classList.add("show");}
+}
+requestAnimationFrame(loop);
+}
+function openGift(){document.querySelector(".gift").textContent="🌸"; document.getElementById("blessingContent").style.display="block";}
+setInterval(()=>{if(gameOver)return; const isBad=Math.random()<0.3; L.push({x:Math.random()*330,y:-20,e:isBad?bads[Math.floor(Math.random()*bads.length)]:goods[level-1],s:2+level*0.7+Math.random()*2,good:!isBad});}, 550);
+c.addEventListener("touchmove",e=>{px=e.touches[0].clientX-c.getBoundingClientRect().left; e.preventDefault();},{passive:false});
+c.addEventListener("mousemove",e=>{px=e.clientX-c.getBoundingClientRect().left});
+lnameEl.textContent=names[0]; loop();
+</script></body></html>
