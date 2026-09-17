@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vinayaka Utsav - Divine Quest</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    font-family:Arial,sans-serif;
+    min-height:100vh;
+    overflow:hidden;
+    background:linear-gradient(135deg,#fff3c4,#ffd6a5,#ff9f43);
+}
+
+#game{
+    width:100%;
+    max-width:1100px;
+    height:100vh;
+    margin:auto;
+    position:relative;
+    overflow:hidden;
+    background:
+    radial-gradient(circle,#fff5 2px,transparent 3px),
+    linear-gradient(#ffd166,#f77f00);
+}
+
+/* HEADER */
+
+header{
+    height:70px;
+    position:relative;
+    z-index:10;
+
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+
+    color:white;
+    font-weight:bold;
+    font-size:17px;
+
+    background:linear-gradient(
+        90deg,
+        #8b0000,
+        #e85d04,
+        #8b0000
+    );
+}
+
+#musicButton{
+    border:none;
+    padding:9px 14px;
+    border-radius:20px;
+    background:#fff3b0;
+    color:#7a2600;
+    font-weight:bold;
+}
+
+/* SCREENS */
+
+#startScreen,
+#levelComplete,
+#gameOver,
+#finalScreen{
+
+    position:absolute;
+    inset:70px 0 0;
+
+    z-index:30;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+
+    text-align:center;
+
+    padding:20px;
+
+    color:white;
+
+    background:linear-gradient(
+        #ffcc70ee,
+        #e85d04ee
+    );
+}
+
+#levelComplete,
+#gameOver,
+#finalScreen{
+    display:none;
+}
+
+#startScreen h1{
+    font-size:clamp(35px,7vw,70px);
+    text-shadow:4px 4px #8b2500;
+}
+
+.ganesha{
+    font-size:120px;
+    animation:float 2s infinite ease-in-out;
+}
+
+@keyframes float{
+    50%{
+        transform:translateY(-15px);
+    }
+}
+
+.startButton,
+.nextButton,
+.restartButton{
+    border:none;
+    padding:15px 28px;
+    border-radius:30px;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
+
+    background:#fff3b0;
+    color:#7a2600;
+
+    box-shadow:0 5px 15px #0005;
+}
+
+.startButton:hover,
+.nextButton:hover,
+.restartButton:hover{
+    transform:scale(1.05);
+}
+
+/* ARENA */
+
+#arena{
+    position:absolute;
+    inset:70px 0 0;
+}
+
+#message{
+    position:absolute;
+    top:80px;
+    width:100%;
+    text-align:center;
+
+    font-size:22px;
+    font-weight:bold;
+
+    color:#6d2100;
+
+    z-index:5;
+}
+
+/* ITEMS */
+
+.item{
+    position:absolute;
+
+    font-size:48px;
+
+    cursor:pointer;
+    user-select:none;
+
+    animation:bounce 1.5s infinite ease-in-out;
+
+    filter:drop-shadow(0 6px 5px #0005);
+
+    transition:.2s;
+}
+
+.item:hover{
+    transform:scale(1.25);
+}
+
+@keyframes bounce{
+    50%{
+        transform:translateY(-10px) rotate(5deg);
+    }
+}
+
+/* WRONG */
+
+.wrong{
+    animation:wrongAnimation .4s;
+}
+
+@keyframes wrongAnimation{
+    25%{transform:translateX(-15px);}
+    50%{transform:translateX(15px);}
+    75%{transform:translateX(-15px);}
+}
+
+/* PARTICLES */
+
+.particle{
+    position:absolute;
+    pointer-events:none;
+
+    font-size:30px;
+
+    animation:particleAnimation 1.2s forwards;
+}
+
+@keyframes particleAnimation{
+    to{
+        transform:
+        translateY(-100px)
+        scale(0);
+
+        opacity:0;
+    }
+}
+
+/* TIMER */
+
+.timerDanger{
+    color:#ffff00;
+    animation:pulse .5s infinite;
+}
+
+@keyframes pulse{
+    50%{
+        transform:scale(1.2);
+    }
+}
+
+/* GAME OVER */
+
+.gameOverTitle{
+    font-size:60px;
+}
+
+.finalTitle{
+    font-size:60px;
+    text-shadow:4px 4px #8b2500;
+}
+
+/* MOBILE */
+
+@media(max-width:600px){
+
+    header{
+        height:65px;
+        font-size:12px;
+    }
+
+    #arena{
+        inset:65px 0 0;
+    }
+
+    #startScreen,
+    #levelComplete,
+    #gameOver,
+    #finalScreen{
+        inset:65px 0 0;
+    }
+
+    .ganesha{
+        font-size:90px;
+    }
+
+    .item{
+        font-size:40px;
+    }
+
+}
+</style>
+</head>
+
+<body>
+
+<div id="game">
+
+<header>
+
+<div>
+🏆 Score:
+<span id="score">0</span>
+</div>
+
+<div>
+❤️ Lives:
+<span id="lives">1</span>
+</div>
+
+<div>
+⭐ Level:
+<span id="level">1</span>/5
+</div>
+
+<div id="timerBox">
+⏱️
+<span id="time">15</span>
+</div>
+
+<button id="musicButton"
+onclick="toggleMusic()">
+🔊 Music
+</button>
+
+</header>
+
+
+<!-- START SCREEN -->
+
+<div id="startScreen">
+
+<div class="ganesha">
+🐘
+</div>
+
+<h1>
+🪔 Vinayaka Utsav 🪔
+</h1>
+
+<p style="font-size:22px;margin:15px">
+✨ Divine Festival Quest ✨
+</p>
+
+<p style="margin:10px">
+Complete all 5 levels!
+</p>
+
+<p style="margin:10px">
+⏱️ You have only <b>15 seconds</b> per level.
+</p>
+
+<p style="margin:10px">
+❌ Choose one wrong item = <b>GAME OVER!</b>
+</p>
+
+<br>
+
+<button
+class="startButton"
+onclick="startGame()">
+
+🙏 START GAME
+
+</button>
+
+</div>
+
+
+<div id="message"></div>
+
+
+<!-- GAME AREA -->
+
+<div id="arena"></div>
+
+
+<!-- LEVEL COMPLETE -->
+
+<div id="levelComplete">
+
+<div style="font-size:70px">
+🎉🙏🎉
+</div>
+
+<h1>
+LEVEL COMPLETE!
+</h1>
+
+<p
+id="levelText"
+style="font-size:22px;margin:20px">
+</p>
+
+<button
+class="nextButton"
+onclick="nextLevel()">
+
+NEXT LEVEL ➜
+
+</button>
+
+</div>
+
+
+<!-- GAME OVER -->
+
+<div id="gameOver">
+
+<div class="gameOverTitle">
+😢
+</div>
+
+<h1>
+GAME OVER
+</h1>
+
+<p
+style="font-size:22px;margin:20px">
+
+You selected the wrong item
+or time ran out!
+
+</p>
+
+<p>
+Score:
+<b id="gameOverScore"></b>
+</p>
+
+<br>
+
+<button
+class="restartButton"
+onclick="restartGame()">
+
+🔄 PLAY AGAIN
+
+</button>
+
+</div>
+
+
+<!-- FINAL -->
+
+<div id="finalScreen">
+
+<div style="font-size:100px">
+🐘🏆
+</div>
+
+<h1 class="finalTitle">
+JAI GANESHA!
+</h1>
+
+<p
+style="font-size:24px;margin:15px">
+
+🎊 You completed all 5 levels! 🎊
+
+</p>
+
+<h2>
+🏆 Final Score:
+<span id="finalScore"></span>
+</h2>
+
+<p
+style="font-size:20px;margin:15px">
+
+🌺 Ganpati Bappa Morya! 🌺
+
+</p>
+
+<button
+class="restartButton"
+onclick="restartGame()">
+
+🔄 PLAY AGAIN
+
+</button>
+
+</div>
+
+</div>
+
+
+<script>
+
+/* =========================
+   GAME VARIABLES
+========================= */
+
+let score = 0;
+
+let lives = 1;
+
+let level = 1;
+
+let time = 15;
+
+let collected = 0;
+
+let timer;
+
+let musicOn = true;
+
+let audioCtx;
+
+
+/* =========================
+   LEVEL DATA
+========================= */
+
+const levels = [
+
+{
+    name:"🌸 Flower Collection",
+
+    good:[
+        "🌸",
+        "🌺",
+        "🌼",
+        "🌻"
+    ],
+
+    bad:[
+        "💣",
+        "🔥",
+        "☠️"
+    ],
+
+    target:8
+},
+
+{
+    name:"🍬 Modak Collection",
+
+    good:[
+        "🍬",
+        "🍡",
+        "🥮"
+    ],
+
+    bad:[
+        "💣",
+        "🔥",
+        "☠️"
+    ],
+
+    target:10
+},
+
+{
+    name:"🪔 Festival Decoration",
+
+    good:[
+        "🪔",
+        "✨",
+        "🏮",
+        "🌸"
+    ],
+
+    bad:[
+        "💣",
+        "🔥",
+        "☠️"
+    ],
+
+    target:12
+},
+
+{
+    name:"🐭 Mouse Treasure Quest",
+
+    good:[
+        "🐭",
+        "💎",
+        "🪙",
+        "🍬"
+    ],
+
+    bad:[
+        "💣",
+        "🔥",
+        "☠️"
+    ],
+
+    target:14
+},
+
+{
+    name:"🏆 Grand Vinayaka Celebration",
+
+    good:[
+        "🐘",
+        "🪔",
+        "🌸",
+        "🍬",
+        "✨",
+        "🏆"
+    ],
+
+    bad:[
+        "💣",
+        "🔥",
+        "☠️"
+    ],
+
+    target:16
+}
+
+];
+
+
+/* =========================
+   START
+========================= */
+
+function startGame(){
+
+    document
+    .getElementById("startScreen")
+    .style.display="none";
+
+    score=0;
+    lives=1;
+    level=1;
+
+    updateUI();
+
+    startMusic();
+
+    beginLevel();
+}
+
+
+/* =========================
+   BEGIN LEVEL
+========================= */
+
+function beginLevel(){
+
+    clearInterval(timer);
+
+    collected=0;
+
+    time=15;
+
+    updateUI();
+
+    document
+    .getElementById("timerBox")
+    .classList.remove("timerDanger");
+
+    showMessage(
+        levels[level-1].name
+    );
+
+    spawnItems();
+
+    timer=setInterval(function(){
+
+        time--;
+
+        updateUI();
+
+        if(time<=5){
+
+            document
+            .getElementById("timerBox")
+            .classList.add("timerDanger");
+
+            playSound(500);
+        }
+
+        if(time<=0){
+
+            clearInterval(timer);
+
+            gameOver(
+                "⏰ Time's Up!"
+            );
+        }
+
+    },1000);
+
+}
+
+
+/* =========================
+   SPAWN ITEMS
+========================= */
+
+function spawnItems(){
+
+    const arena=
+        document.getElementById("arena");
+
+    arena.innerHTML="";
+
+    const currentLevel=
+        levels[level-1];
+
+    const total=
+        currentLevel.target+10;
+
+
+    for(let i=0;i<total;i++){
+
+        const item=
+            document.createElement("div");
+
+        item.className="item";
+
+
+        /*
+        Around 20% of items
+        are dangerous.
+        */
+
+        const isBad=
+            Math.random()<0.20;
+
+
+        if(isBad){
+
+            item.textContent=
+                currentLevel.bad[
+                    Math.floor(
+                        Math.random()*
+                        currentLevel.bad.length
+                    )
+                ];
+
+            item.onclick=
+                function(){
+
+                    wrongItem(item);
+                };
+
+        }else{
+
+            item.textContent=
+                currentLevel.good[
+                    Math.floor(
+                        Math.random()*
+                        currentLevel.good.length
+                    )
+                ];
+
+            item.onclick=
+                function(){
+
+                    collectItem(item);
+                };
+        }
+
+
+        item.style.left=
+            (Math.random()*88+3)+"%";
+
+        item.style.top=
+            (Math.random()*75+12)+"%";
+
+        item.style.animationDelay=
+            (Math.random()*1.5)+"s";
+
+
+        arena.appendChild(item);
+    }
+
+}
+
+
+/* =========================
+   CORRECT ITEM
+========================= */
+
+function collectItem(item){
+
+    if(item.dataset.clicked)
+        return;
+
+    item.dataset.clicked=true;
+
+    collected++;
+
+    score+=10*level;
+
+    document
+    .getElementById("score")
+    .textContent=score;
+
+    particle(item,"✨");
+
+    playSound(750);
+
+    item.remove();
+
+
+    if(
+        collected>=
+        levels[level-1].target
+    ){
+
+        completeLevel();
+    }
+
+}
+
+
+/* =========================
+   WRONG ITEM
+========================= */
+
+function wrongItem(item){
+
+    if(item.dataset.clicked)
+        return;
+
+    item.dataset.clicked=true;
+
+    item.classList.add("wrong");
+
+    playSound(120);
+
+    particle(item,"❌");
+
+    /*
+    IMPORTANT:
+    One wrong item means
+    immediate game over.
+    */
+
+    setTimeout(function(){
+
+        gameOver(
+            "❌ Wrong item selected!"
+        );
+
+    },350);
+
+}
+
+
+/* =========================
+   LEVEL COMPLETE
+========================= */
+
+function completeLevel(){
+
+    clearInterval(timer);
+
+    document
+    .getElementById("arena")
+    .innerHTML="";
+
+    document
+    .getElementById("levelComplete")
+    .style.display="flex";
+
+
+    document
+    .getElementById("levelText")
+    .textContent=
+        levels[level-1].name+
+        " completed! 🎉";
+}
+
+
+/* =========================
+   NEXT LEVEL
+========================= */
+
+function nextLevel(){
+
+    document
+    .getElementById("levelComplete")
+    .style.display="none";
+
+
+    if(level<5){
+
+        level++;
+
+        beginLevel();
+
+    }else{
+
+        finalGame();
+    }
+
+}
+
+
+/* =========================
+   GAME OVER
+========================= */
+
+function gameOver(reason){
+
+    clearInterval(timer);
+
+    document
+    .getElementById("arena")
+    .innerHTML="";
+
+    document
+    .getElementById("gameOver")
+    .style.display="flex";
+
+
+    document
+    .getElementById("gameOverScore")
+    .textContent=score;
+
+
+    playSound(100);
+}
+
+
+/* =========================
+   FINAL GAME
+========================= */
+
+function finalGame(){
+
+    clearInterval(timer);
+
+    document
+    .getElementById("finalScreen")
+    .style.display="flex";
+
+    document
+    .getElementById("finalScore")
+    .textContent=score;
+
+    celebration();
+
+}
+
+
+/* =========================
+   RESTART
+========================= */
+
+function restartGame(){
+
+    location.reload();
+
+}
+
+
+/* =========================
+   UI
+========================= */
+
+function updateUI(){
+
+    document
+    .getElementById("score")
+    .textContent=score;
+
+    document
+    .getElementById("lives")
+    .textContent=lives;
+
+    document
+    .getElementById("level")
+    .textContent=level;
+
+    document
+    .getElementById("time")
+    .textContent=time;
+
+}
+
+
+/* =========================
+   MESSAGE
+========================= */
+
+function showMessage(text){
+
+    const message=
+        document.getElementById("message");
+
+    message.textContent=text;
+
+    setTimeout(function(){
+
+        message.textContent="";
+
+    },1800);
+
+}
+
+
+/* =========================
+   PARTICLES
+========================= */
+
+function particle(item,symbol){
+
+    const p=
+        document.createElement("div");
+
+    p.className="particle";
+
+    p.textContent=symbol;
+
+    p.style.left=
+        item.offsetLeft+"px";
+
+    p.style.top=
+        item.offsetTop+"px";
+
+    document
+    .getElementById("arena")
+    .appendChild(p);
+
+
+    setTimeout(function(){
+
+        p.remove();
+
+    },1200);
+
+}
+
+
+/* =========================
+   CELEBRATION
+========================= */
+
+function celebration(){
+
+    const arena=
+        document.getElementById("arena");
+
+
+    for(let i=0;i<100;i++){
+
+        const p=
+            document.createElement("div");
+
+        p.className="particle";
+
+        p.textContent=
+            [
+                "🎉",
+                "🌸",
+                "✨",
+                "🪔",
+                "🙏",
+                "🎊",
+                "🌺"
+            ][
+                Math.floor(
+                    Math.random()*7
+                )
+            ];
+
+
+        p.style.left=
+            Math.random()*100+"%";
+
+        p.style.top=
+            (50+
+            Math.random()*40)+"%";
+
+        p.style.fontSize=
+            (20+
+            Math.random()*35)+"px";
+
+
+        arena.appendChild(p);
+    }
+
+}
+
+
+/* =========================
+   MUSIC
+========================= */
+
+function startMusic(){
+
+    try{
+
+        audioCtx=
+        new(
+            window.AudioContext ||
+            window.webkitAudioContext
+        )();
+
+        musicLoop();
+
+    }catch(e){}
+
+}
+
+
+function musicLoop(){
+
+    if(
+        !musicOn ||
+        !audioCtx
+    )
+        return;
+
+
+    const notes=[
+        261.6,
+        329.6,
+        392,
+        523.3
+    ];
+
+
+    notes.forEach(
+        function(freq,index){
+
+            const osc=
+                audioCtx.createOscillator();
+
+            const gain=
+                audioCtx.createGain();
+
+
+            osc.type="sine";
+
+            osc.frequency.value=freq;
+
+            gain.gain.value=.035;
+
+
+            osc.connect(gain);
+
+            gain.connect(
+                audioCtx.destination
+            );
+
+
+            osc.start(
+                audioCtx.currentTime+
+                index*.35
+            );
+
+            osc.stop(
+                audioCtx.currentTime+
+                index*.35+
+                .25
+            );
+
+        }
+    );
+
+
+    setTimeout(
+        musicLoop,
+        1600
+    );
+
+}
+
+
+/* =========================
+   SOUND EFFECT
+========================= */
+
+function playSound(freq){
+
+    if(!audioCtx)
+        return;
+
+
+    const osc=
+        audioCtx.createOscillator();
+
+    const gain=
+        audioCtx.createGain();
+
+
+    osc.frequency.value=freq;
+
+    osc.type="sine";
+
+
+    osc.connect(gain);
+
+    gain.connect(
+        audioCtx.destination
+    );
+
+
+    gain.gain.setValueAtTime(
+        .12,
+        audioCtx.currentTime
+    );
+
+
+    gain.gain.exponentialRampToValueAtTime(
+        .001,
+        audioCtx.currentTime+.3
+    );
+
+
+    osc.start();
+
+    osc.stop(
+        audioCtx.currentTime+.3
+    );
+
+}
+
+
+/* =========================
+   MUSIC BUTTON
+========================= */
+
+function toggleMusic(){
+
+    musicOn=!musicOn;
+
+
+    document
+    .getElementById("musicButton")
+    .textContent=
+        musicOn
+        ? "🔊 Music"
+        : "🔇 Music";
+
+
+    if(musicOn){
+
+        if(!audioCtx)
+            startMusic();
+
+        else
+            musicLoop();
+
+    }
+
+}
+
+</script>
+
+</body>
+  </html>
